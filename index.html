@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+ <head>
+ 	<link rel="stylesheet" type="text/css" href="MyStyle.css">
+	
+ </head>
+
+
+<body>
+ 
+<!--all user inputs-->
+   <h2>Input for Double Angle Checks</h2>
+
+<table>
+<tr>
+	<td>Number of bolts</td>
+	<td><form><select id = "numBolts">
+		<option value = 3 type = "number">3</option>
+		<option value = 4 type = "number">4</option>
+		<option value = 5 type = "number">5</option>
+		<option value = 6 type = "number">6</option>
+		<option value = 7 type = "number">7</option>
+	</form></td>
+</tr>
+<tr>
+	<td>Bolt diameter</td> 
+	<td><form><select id = "boltSize">
+		<option value = 0.5 type = "number">1/2</option>
+		<option value = 0.75 type = "number">3/4</option>
+		<option value = 0.875 type = "number">7/8</option>
+		<option value = 1 type = "number">1</option>
+		<option value = 1.25 type = "number">1 1/4</option>
+	</select></form></td>
+</tr>
+<tr>
+	<td>Thread Condition</td>
+	<td><select id = "threadCond">
+		<option value = "N">N</option>
+		<option value = "X">X</option>
+</tr>
+<tr>
+	<td>Bolt Spacing</td>
+	<td><form><input id = "boltSpacing"></form></td>
+</tr>
+<tr>
+	<td>Bolt grade</td> 
+	<td><select id = "boltGrade">
+		<option>A325</option>
+		<option>A490</option>
+	</select></td>
+</tr>
+<tr>
+	<td>Angle</td>
+	<td><select id = "angleSize">
+	</select>
+	</td>
+</tr>	
+
+</table>
+
+
+<button id = "theButton">Calculate strengths</button>
+
+
+<div id = "checks"></div>
+<div id = "checks1"></div>
+<script src="https://www.gstatic.com/firebasejs/3.7.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCKn2GS1dSRVd0e6tTLFu-iLVQrQTAEByo",
+    authDomain: "steel-design.firebaseapp.com",
+    databaseURL: "https://steel-design.firebaseio.com",
+    storageBucket: "steel-design.appspot.com",
+    messagingSenderId: "519166628563"
+  };
+  firebase.initializeApp(config);
+</script>
+<script src="js/jquery-3.1.1.js"></script>
+<script type = "text/javascript" src = "WshapesJS.js"></script>
+<script type = "text/javascript" src = "AngleScript.js"></script>
+
+</body>
+</html>
