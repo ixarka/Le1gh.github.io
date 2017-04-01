@@ -3,8 +3,8 @@
 
 $(document).ready(function() {
    var config = {
-    apiKey: "AIzaSyCKn2GS1dSRVd0e6tTLFu-iLVQrQTAEByo",
-    authDomain: "steel-design.firebaseapp.com",
+   apiKey: "AIzaSyCKn2GS1dSRVd0e6tTLFu-iLVQrQTAEByo",
+   authDomain: "steel-design.firebaseapp.com",
     databaseURL: "https://steel-design.firebaseio.com",
     projectId: "steel-design",
     storageBucket: "steel-design.appspot.com",
@@ -12,10 +12,9 @@ $(document).ready(function() {
   };
   firebase.initializeApp(config);
 
-  var database = firebase.database;
-	console.log(database[0].A);
+  var database = firebase.database();
+console.log(database[0].A);
  
-
 	$("#theButton").on("click", boltShear).on("click", boltBearingOnBeam).on("click", boltSC).on("click", boltTearoutOnBeam).on('click', drawFig).on('click', testFunc);
 	$('#startAgainBtn').on('click', startOver);
 //declare global variables
