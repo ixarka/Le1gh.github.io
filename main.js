@@ -1,15 +1,20 @@
 
-var config = {
+
+
+$(document).ready(function() {
+   var config = {
     apiKey: "AIzaSyCKn2GS1dSRVd0e6tTLFu-iLVQrQTAEByo",
     authDomain: "steel-design.firebaseapp.com",
     databaseURL: "https://steel-design.firebaseio.com",
+    projectId: "steel-design",
     storageBucket: "steel-design.appspot.com",
     messagingSenderId: "519166628563"
   };
   firebase.initializeApp(config);
-  var database = firebase.database;
 
-$(document).ready(function() {
+  var database = firebase.database;
+	console.log(database[0].A);
+ 
 
 	$("#theButton").on("click", boltShear).on("click", boltBearingOnBeam).on("click", boltSC).on("click", boltTearoutOnBeam).on('click', drawFig).on('click', testFunc);
 	$('#startAgainBtn').on('click', startOver);
@@ -154,7 +159,6 @@ function boltSC() {
 
 	}
 	
-console.log(Tb);
 		}
 		
 
@@ -235,8 +239,7 @@ function drawFig() {
 	boltSize = $('#boltSize').val();
 	Le = parseFloat($('#edgeDist').val())
 	angleLength = (numBolts-1)*boltSpacing + 2*Le;
-	console.log(Le);
-	console.log(angleLength);
+	
 	for (var i = 0; i < Wshapes.length; i++) {
 		if (beamSize === Wshapes[i].Size) {
 			beamtw = parseFloat(Wshapes[i].tw);
@@ -245,7 +248,7 @@ function drawFig() {
 			beamd = parseFloat(Wshapes[i].d);
 		}
 	}
-	console.log(angleSize);
+	
 	for (var i = 0; i < angles.length; i++) {
 		if (angleSize === angles[i].Size) {
 			anglet = parseFloat(angles[i].t);
