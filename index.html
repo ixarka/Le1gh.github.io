@@ -13,7 +13,7 @@
 
 <div class = "col-md-5">
 <h2>User Inputs</h2>
-<table class = "table table-hover table-bordered table-condensed table-striped">
+<table id = "inputTable" class = "table table-hover table-bordered table-condensed table-striped">
 <tr>
 	<td>Number of bolts</td>
 	<td><form><select id = "numBolts">
@@ -65,14 +65,6 @@
 		<option value = "No">No</option>
 </tr>
 <tr>
-	<td>Interior Bolt Spacing</td>
-	<td><form><input id = "boltSpacing" placeholder = 3.0 value = 3.0></form></td>
-</tr>
-<tr>
-	<td>Edge Distance on Angles</td>
-	<td><form><input id = "edgeDist" placeholder = 1.5 value =1.5></form></td>
-</tr>
-<tr>
 	<td>Bolt Grade</td> 
 	<td><select id = "boltGrade">
 		<option value = "groupA">Group A</option>
@@ -88,9 +80,31 @@
 	</select></td>
 </tr>
 <tr>
+	<td>Interior Bolt Spacing</td>
+	<td><form><input id = "boltSpacing" placeholder = 3.0 value = 3.0></form></td>
+</tr>
+<tr>
+	<td>Edge Distance on Angles</td>
+	<td><form><input id = "edgeDistAngles" placeholder = 1.5 value =1.5></form></td>
+</tr>
+<tr>
+	<td>Edge Distance on Beam</td>
+	<td><form><input id = "edgeDistBeam" placeholder = 1.5 value =1.5></form></td>
+</tr>
+<tr>
+	<td>Beam Cope</td>
+	<td><form id = "beamCopeForm">
+		<select id = "beamCope">
+		<option></option>
+		<option value = "toponly">Yes, top only</option>
+		<option value = "both">Yes, both top and bottom</option>
+		<option value = "no">No</option>
+		</select>
+		</form>
+</tr>
+<tr>
 	<td>Angle Size</td>
 	<td><select id = "angleSize">
-	n>
 <option>L5X5X7/8</option>
 <option>L5X5X3/4</option>
 <option>L5X5X5/8</option>
@@ -396,8 +410,8 @@
         <td>{{tearout}}</td>
         </tr>
         <tr>
-        <td>Beam web</td>
-        <td>{{tw}}</td>
+        <td>Slip Critical Strength</td>
+        <td>{{slipCritStrength}}</td>
         </tr>           
       </table>
     </script>
