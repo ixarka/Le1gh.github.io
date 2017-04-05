@@ -10,22 +10,23 @@ $('#startAgainBtn').on('click', startOver);
 $('#beamCopeForm').one('change', function() {
 	var copeCondition = $('#beamCope').val();
 	
-	if (copeCondition === "toponly") {
+	if (copeCondition === "toponly" || copeCondition ==="both") {
+		console.log(copeCondition);
+		var mytable = document.getElementById('inputTable');
+		var row = mytable.insertRow(10);
+		var cell1 = row.insertCell(0);
+    	var cell2 = row.insertCell(1);
+    	cell1.innerHTML = "Top Edge Distance to Beam Cope";
+    	cell2.innerHTML = "<input id='copeEdgeDist_top' placeholder = 1.5 value=1.5></input>";
+	} 
+	if (copeCondition ==="both") {
 		console.log(copeCondition);
 		var mytable = document.getElementById('inputTable');
 		var row = mytable.insertRow(11);
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
-    	cell1.innerHTML = "Edge Distance to Beam Cope";
-    	cell2.innerHTML = "<input id='copeEdgeDist'></input>";
-	} else if (copeCondition ==="both") {
-		console.log(copeCondition);
-		var mytable = document.getElementById('inputTable');
-		var row = mytable.insertRow(11);
-		var cell1 = row.insertCell(0);
-    	var cell2 = row.insertCell(1);
-    	cell1.innerHTML = "Least Edge Distance to Beam Cope";
-    	cell2.innerHTML = "<input id='copeEdgeDist'></input>";
+    	cell1.innerHTML = "Bottom Edge Distance to Beam Cope";
+    	cell2.innerHTML = "<input id='copeEdgeDist_bot' placeholder = 1.5 value=1.5></input>";
 	}
 });
 
@@ -39,6 +40,7 @@ var phiPnBS;
 var phiPnBearing;
 var phiPnTearout;
 var phiPnSC;
+var phiPnBeamYield;
 
 function getProps() {
 
@@ -69,17 +71,16 @@ beam = {
 	bf: beambf,
 	tf: beamtf,
 	d: beamd,
-	cope: $('#beamCope').val(),
-	Lev: parseFloat($('#edgeDistBeam').val())
+	Lev_top: parseFloat($('#copeEdgeDist_top').val()),
+	Lev_bot: parseFloat($('#copeEdgeDist_bot').val())
 }
 
 angle = {
 	Fy: 36,
 	Fu: 58,
-	Lev: parseFloat($('#edgeDistAngles').val()),
 	t: anglet,
 	b: angleb,
-	Lev: $('#edgeDistAngles').val()
+	Lev: parseFloat($('#edgeDistAngles').val())
 };
 
 bolt = {
@@ -93,7 +94,7 @@ bolt = {
 	type: $('#jointType').val()
 };
 
-//inside this funtion we call the function that does several mathematical operations
+//inside this funtion we call the following functions
 runCalcs(angle, beam, bolt);
 drawFig(angle, beam, bolt);
 displayTable();
@@ -101,7 +102,7 @@ displayTable();
 };
 
 
-function runCalcs(anAngle, aBeam, aBolt) {
+function runCalcs(angle, beam, bolt) {
 
 //
 //BOLT SHEAR
@@ -123,7 +124,7 @@ if (bolt.grade === "groupA") {
 		}
 }  
 
-phiPnBS = 0.75*boltStrength*0.25*3.14159*bolt.size*bolt.size*bolt.n;
+phiPnBS = 0.75*2*boltStrength*0.25*3.14159*bolt.size*bolt.size*bolt.n;
 phiPnBS = Math.round(phiPnBS, 1);
 //
 //SLIP CRITICAL STRENGTH
@@ -202,17 +203,17 @@ phiPnBS = Math.round(phiPnBS, 1);
 			}
 
 	}
+//this is incomplete. The following is a placeholder.
 	if (bolt.hole === "STD" || bolt.hole === "SSLT") {
 		phiPnSC = 100;
 	}
 	else if (bolt.hole === "OVS") {
 		phiPnSC = 200;
 	}
-console.log(phiPnSC);
+
 //
 //BOLT BEARING ON BEAM
 //
-phiPnBearing;
 
 	if (bolt.defCond === "Yes") {
 		phiPnBearing = 0.75*2.4*bolt.n*bolt.size*beam.tw*beam.Fu;
@@ -226,7 +227,7 @@ phiPnBearing;
 //
 //BOLT TEAROUT ON BEAM
 //
-phiPnTearout;
+
 	var holeDiameter;
 	if (bolt.hole === "STD" && bolt.size < 1) {
 		holeDiameter = bolt.size + 1/16;
@@ -250,22 +251,38 @@ phiPnTearout;
 		holeDiameter = bolt.size + 0.3125;
 	}
 	var Lc = bolt.s - holeDiameter;
-	if (bolt.defCond === "Yes") {
-		phiPnTearout = 0.75*1.2*((bolt.n-1)*Lc+beam.Lev)*beam.tw*beam.Fu;
-	}
-	else if (bolt.defCond === "No") {
-		phiPnTearout = 0.75*2.4*((bolt.n-1)*Lc+beam.Lev)*beam.tw*beam.Fu;
+	if (beam.Lev_top && beam.Lev_bot) {
+		if (bolt.defCond === "Yes") {
+			phiPnTearout = 0.75*1.2*((bolt.n-1)*Lc+beam.Lev_top+beam.Lev_bot)*beam.tw*beam.Fu;
+			phiPnTearout = Math.round(phiPnTearout, 1);
+		}
+		else if (bolt.defCond === "No") {
+			phiPnTearout = 0.75*2.4*((bolt.n-1)*Lc+beam.Lev_top+beam.Lev_bot)*beam.tw*beam.Fu;
+			phiPnTearout = Math.round(phiPnTearout, 1);
+		}
+	} else {
+		phiPnTearout = "N/A"	
 	}
 	
-	phiPnTearout = Math.round(phiPnTearout, 1);
-};
+//
+//SHEAR YIELDING ON BEAM
+//
 
+if (beam.Lev_top && beam.Lev_bot) {
+	phiPnBeamYield = 1.0*beam.Fy*beam.tw*((bolt.n-1)*bolt.s+beam.Lev_top+beam.Lev_bot);
+} else {
+	phiPnBeamYield = "N/A";
+}
+
+//this is closing curly brace of runCalcs()
+};
 //
 // FUNCTION TO DRAW FIGURE
 //
+
 function drawFig(anAngle, aBeam, aBolt) {
 	
-	var angleLength = (bolt.n-1)*bolt.s + 2*beam.Lev;
+	var angleLength = (bolt.n-1)*bolt.s + 2*angle.Lev;
 	var r = beam.tw;	
 	var c = document.getElementById("myCanvas");
 	c.width = beam.bf*1.2*7;
@@ -329,7 +346,7 @@ function drawFig(anAngle, aBeam, aBolt) {
 	for (var i = 0; i<bolt.n; i++) {
 		ctx.beginPath();
 		var ctrx = 0.5*beam.bf - 0.5*beam.tw - angle.b*0.6;
-		var ctry = 2*beam.tf+beam.Lev+i*bolt.s;
+		var ctry = 2*beam.tf+angle.Lev+i*bolt.s;
 		ctx.arc(ctrx, ctry, bolt.size*0.5, 0, 2*Math.PI, true);
 		ctx.fill();
 		ctx.stroke();
@@ -338,7 +355,7 @@ function drawFig(anAngle, aBeam, aBolt) {
 	for (var i = 0; i<bolt.n; i++) {
 		ctx.beginPath();
 		var ctrx = 0.5*beam.bf + 0.5*beam.tw + angle.b*0.6;
-		var ctry = 2*beam.tf+beam.Lev+i*bolt.s;
+		var ctry = 2*beam.tf+angle.Lev+i*bolt.s;
 		ctx.arc(ctrx, ctry, bolt.size*0.5, 0, 2*Math.PI, true);
 		ctx.fill();
 		ctx.stroke();
@@ -347,7 +364,7 @@ function drawFig(anAngle, aBeam, aBolt) {
 	//draw bolts through beam web
 	for (var i = 0; i<bolt.n; i++) {
 		ctx.beginPath();
-		var ycoord = 2*beam.tf+beam.Lev-0.5*bolt.size+i*bolt.s;
+		var ycoord = 2*beam.tf+angle.Lev-0.5*bolt.size+i*bolt.s;
 		ctx.rect(0.5*beam.bf - 0.5*beam.tw-angle.t, ycoord, 2*angle.t+beam.tw, bolt.size);
 		ctx.fill();
 		ctx.stroke();
@@ -361,7 +378,7 @@ function drawFig(anAngle, aBeam, aBolt) {
 function displayTable() {
 	var source = $("#limit-states").html();
 	var template = Handlebars.compile(source);
-	var data = {phiPnBS: phiPnBS, bearing: phiPnBearing, tearout: phiPnTearout, slipCritStrength: phiPnSC };
+	var data = {phiPnBS: phiPnBS, bearing: phiPnBearing, tearout: phiPnTearout, slipCritStrength: phiPnSC, shearYieldBeam: phiPnBeamYield };
 	var newTable = template(data);
 	$('#checks').html(newTable);
 	$('#theButton').hide();
