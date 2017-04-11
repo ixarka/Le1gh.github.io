@@ -1,13 +1,51 @@
-.container {
-	border: 5px solid black;
-	display: inline-block;
-	position: fixed;
+body {
+    /*background-color: #ffa07a;*/
+	/*background-image: url("Fibnums.jpg");*/
 
+	font-family: "Arial";
+    font-size: 12px;
+	color: dark gray;
+  
 }
 
-div.all {
-	border: 2px dashed blue;
-	padding: 2px;
-	margin: 10px;
-	display:inline-block;
-	}
+h1 {
+	text-align: center;
+	font-size: 28px;
+	font-variant: small-caps;
+}
+
+h2 {
+	font-variant: small-caps;
+	font-size: 18px;
+}
+
+#myCanvas {
+	vertical-align: top;
+	text-align: center;
+	padding-top: 44px;
+}
+
+#startAgainBtn {
+	display:none;
+}
+/*
+table td {
+	width: 300px;
+}
+
+
+
+
+	
+}
+
+#divButton {
+display:inline-block;
+float: left;
+}
+
+div {
+	border: 2px solid blue;
+	
+}
+*/
