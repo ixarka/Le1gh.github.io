@@ -1,5 +1,4 @@
 
-
 //global variables which are used by the displayTable function that populates the Handlebars template
 var phiPnBS;
 var phiPnBearing;
@@ -12,7 +11,21 @@ var phiPnBeamRupt;
 var phiPnAngleYield;
 var phiPnAngleRupt;
 
+
+
 $(document).ready(function() {
+
+	var config = {
+   apiKey: "AIzaSyCKn2GS1dSRVd0e6tTLFu-iLVQrQTAEByo",
+   authDomain: "steel-design.firebaseapp.com",
+   databaseURL: "https://steel-design.firebaseio.com",
+   projectId: "steel-design",
+   storageBucket: "steel-design.appspot.com",
+   messagingSenderId: "519166628563"
+  };
+firebase.initializeApp(config);
+
+
   //event listener for the button
 $("#theButton").on("click", getProps);
 
@@ -46,14 +59,46 @@ $('#beamCopeForm').one('change', function() {
 //end of on ready function
 });
 
+
+//this function never gets called. I tried, but couldn't get this to work.
+function getFB(aBeam) {
+var DB = firebase.database();
+DB.ref().on('value', function(results) {
+	var allShapes = results.val();
+	for (var i in allShapes) {
+		if (allShapes[i].Size === aBeam) {
+			shape = allShapes[i];
+			tw = shape.tw;
+			bf = shape.bf;
+			d = shape.d;
+			tf = shape.tf
+			}
+	}
+	var theBeam = {
+		Fy: 50,
+		Fu: 65,
+		tw: tw,
+		d: d,
+		bf: bf,
+		tf: tf,
+		Lev_top: parseFloat($('#copeEdgeDist_top').val()),
+		Lev_bot: parseFloat($('#copeEdgeDist_bot').val())
+	};
+	
+});
+
+}
+
+
 function getProps() {
+
+var beamSize= $('#beamSize').val();
+var angleSize= $('#angleSize').val();
+console.log(beamSize);
 
 var beam;
 var angle;
 var bolt;
-
-var beamSize= $('#beamSize').val();
-var angleSize= $('#angleSize').val();
 
 //Wshapes is a large array of objects in a separate Wshapes.js file
 for (var i = 0; i < Wshapes.length; i++) {
