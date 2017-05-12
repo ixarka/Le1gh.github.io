@@ -1,6 +1,7 @@
 
 //global variables which are used by the displayTable function that populates the Handlebars template
-var phiPnBS;
+var phiPnBSAngle;
+var phiPnBSBeam;
 var phiPnBearing;
 var phiPnTearout;
 var phiPnBearingAngle;
@@ -15,17 +16,6 @@ var phiPnAngleRupt;
 
 $(document).ready(function() {
 
-	var config = {
-   apiKey: "AIzaSyCKn2GS1dSRVd0e6tTLFu-iLVQrQTAEByo",
-   authDomain: "steel-design.firebaseapp.com",
-   databaseURL: "https://steel-design.firebaseio.com",
-   projectId: "steel-design",
-   storageBucket: "steel-design.appspot.com",
-   messagingSenderId: "519166628563"
-  };
-firebase.initializeApp(config);
-
-
   //event listener for the button
 $("#theButton").on("click", getProps);
 
@@ -35,66 +25,63 @@ $('#startAgainBtn').on('click', startOver);
 //event listener to ask for additional user input only if beam is coped
 $('#beamCopeForm').one('change', function() {
 	var copeCondition = $('#beamCope').val();
+	var n = document.getElementById('inputTable').rows.length;
 	
-	if (copeCondition === "toponly" || copeCondition ==="both") {
-		console.log(copeCondition);
+	if (copeCondition === "toponly") {
 		var mytable = document.getElementById('inputTable');
-		var row = mytable.insertRow(11);
+		var row = mytable.insertRow(n-2);
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
     	cell1.innerHTML = "Beam Cope - Top Edge Distance";
     	cell2.innerHTML = "<input id='copeEdgeDist_top' placeholder = 1.5 value=1.5></input>";
+    	var row = mytable.insertRow(n-1);
+		var cella = row.insertCell(0);
+    	var cellb = row.insertCell(1);
+    	cella.innerHTML = "Beam - Horizontal End Distance";
+    	cellb.innerHTML = "<input id='beamLeh' placeholder = 1.25 value = 1.25></input>";
 	} 
 	if (copeCondition ==="both") {
-		console.log(copeCondition);
 		var mytable = document.getElementById('inputTable');
-		var row = mytable.insertRow(12);
+		var row = mytable.insertRow(n-2);
+		var cell1 = row.insertCell(0);
+    	var cell2 = row.insertCell(1);
+    	cell1.innerHTML = "Beam Cope - Top Edge Distance";
+    	cell2.innerHTML = "<input id='copeEdgeDist_top' placeholder = 1.5 value=1.5></input>";
+		var mytable = document.getElementById('inputTable');
+		var row = mytable.insertRow(n-1);
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
     	cell1.innerHTML = "Beam Cope - Bottom Edge Distance";
     	cell2.innerHTML = "<input id='copeEdgeDist_bot' placeholder = 1.5 value=1.5></input>";
+    	var row = mytable.insertRow(n);
+		var cella = row.insertCell(0);
+    	var cellb = row.insertCell(1);
+    	cella.innerHTML = "Beam - Horizontal End Distance";
+    	cellb.innerHTML = "<input id='beamLeh' placeholder = 1.25 value = 1.25></input>";
 	}
+});
+
+//event listener to ask for additional user input only if SC bolts
+$('#jointTypeForm').one('change', function() {
+	var jointType = $('#jointType').val();	
+	if (jointType === "SCA" || jointType ==="SCB") {
+		var mytable = document.getElementById('inputTable');
+		var row = mytable.insertRow(8);
+		var cell1 = row.insertCell(0);
+    	var cell2 = row.insertCell(1);
+    	cell1.innerHTML = "Number of fillers";
+    	cell2.innerHTML = "<input id='numFillers' type = number></input>";
+    	
+	} 
 });
 
 //end of on ready function
 });
 
-
-//this function never gets called. I tried, but couldn't get this to work.
-function getFB(aBeam) {
-var DB = firebase.database();
-DB.ref().on('value', function(results) {
-	var allShapes = results.val();
-	for (var i in allShapes) {
-		if (allShapes[i].Size === aBeam) {
-			shape = allShapes[i];
-			tw = shape.tw;
-			bf = shape.bf;
-			d = shape.d;
-			tf = shape.tf
-			}
-	}
-	var theBeam = {
-		Fy: 50,
-		Fu: 65,
-		tw: tw,
-		d: d,
-		bf: bf,
-		tf: tf,
-		Lev_top: parseFloat($('#copeEdgeDist_top').val()),
-		Lev_bot: parseFloat($('#copeEdgeDist_bot').val())
-	};
-	
-});
-
-}
-
-
 function getProps() {
 
 var beamSize= $('#beamSize').val();
 var angleSize= $('#angleSize').val();
-console.log(beamSize);
 
 var beam;
 var angle;
@@ -110,33 +97,42 @@ for (var i = 0; i < Wshapes.length; i++) {
 		}
 	}
 	
-//angles is a large array of objects in a separate angles.js file
-for (var i = 0; i < angles.length; i++) {
-		if (angleSize === angles[i].Size) {
-			anglet = parseFloat(angles[i].t);
-			angleb = parseFloat(angles[i].b);
-		}
-	}
+//deal with beam cope geometry
+var Lev_top = parseFloat($('#copeEdgeDist_top').val());
+var Lev_bot = parseFloat($('#copeEdgeDist_bot').val());
+var Leh = parseFloat($('#beamLeh').val());
 
+if (isNaN(Lev_top)) {
+	Lev_top = 0;
+}
+if (isNaN(Lev_bot)) {
+	Lev_bot = 0;
+}
+if (isNaN(Leh)) {
+	Leh = 0;
+}
 beam = {
 	Fy: 50,
 	Fu: 65,
+	cope: $('#beamCope').val(),
 	tw: beamtw,
 	bf: beambf,
 	tf: beamtf,
 	d: beamd,
-	Lev_top: parseFloat($('#copeEdgeDist_top').val()),
-	Lev_bot: parseFloat($('#copeEdgeDist_bot').val())
+	Lev_top: Lev_top,
+	Lev_bot:Lev_bot, 
+	Leh: Leh
 }
 
 
 angle = {
 	Fy: 36,
 	Fu: 58,
-	t: anglet,
-	b: angleb,
+	t: parseFloat($('#angleThickness').val()),
+	b: 3.5,
 	Lev_top: parseFloat($('#edgeDistAngleTop').val()),
-	Lev_bot: parseFloat($('#edgeDistAngleBot').val())
+	Lev_bot: parseFloat($('#edgeDistAngleBot').val()),
+	Leh: parseFloat($('#horizDistAngle').val())
 };
 
 bolt = {
@@ -154,26 +150,44 @@ var holeDia;
 	if (bolt.hole === "STD" && bolt.size < 1) {
 		holeDia = bolt.size + 1/16;
 	}
-	else if (hole === "STD" && bolt.size >= 1) {
+	else if (bolt.hole === "STD" && bolt.size >= 1) {
 		holeDia = bolt.size + 0.125;
 	}
-	else if (hole === "OVS" || hole === "SSLT" && bolt.size === 0.5) {
+	else if (bolt.hole === "OVS" || bolt.hole === "SSLT" && bolt.size === 0.5) {
 		holeDia = 0.625;
 	}
-	else if (hole === "OVS" || hole === "SSLT" && bolt.size >= 0.625 && bolt.size < 1) {
+	else if (bolt.hole === "OVS" || bolt.hole === "SSLT" && bolt.size >= 0.625 && bolt.size < 1) {
 		holeDia = bolt.size + 3/16;
 	}
-	else if (hole === "OVS" || hole === "SSLT" && bolt.size === 1) {
+	else if (bolt.hole === "OVS" || bolt.hole === "SSLT" && bolt.size === 1) {
 		holeDia = bolt.size + 0.25;
 	}
-	else if (hole === "OVS" || hole === "SSLT" && bolt.size > 1) {
+	else if (bolt.hole === "OVS" || bolt.hole === "SSLT" && bolt.size > 1) {
 		holeDia = bolt.size + 0.3125;
 	}
-	else if (hole === "SSLT" || hole === "SSLT" && bolt.size > 1) {
+	else if (hole === "SSLT" || bolt.hole === "SSLT" && bolt.size > 1) {
 		holeDia = bolt.size + 0.3125;
 	}
 
+//CHECKS TO MAKE SURE GEOMETRIES ARE REASONABLE
+if (beam.d < (angle.Lev_top+angle.Lev_bot+(bolt.n-1)*bolt.s)) {
+	alert("The connection is too long. Please choose a different geometry.");
+}
+if (bolt.hole === "OVS" || bolt.hole === "OVS" && bolt.type === "STD" ) {
+	alert("You must use a slip-critical joint with OVS or SSLT holes.");
+}
+if (bolt.s < bolt.size*2.67 || bolt.s-(bolt.size+.125) < bolt.size) {
+	alert("Bolt spacing must be at least 2-2/3d and bolt clear distance must be at least d.");
+}
 
+var maxDist = Math.max(beam.Leh, beam.Lev_top, beam.Lev_bot, angle.Leh, angle.Lev_top, angle.Lev_bot);
+
+if (maxDist > 6 || maxDist > 12*beam.tw || maxDist > 12*angle.t) {
+	alert("Bolt edge distance is too large.");
+}
+if (beam.cope == "") {
+	alert("Please specify beam cope information.");
+}
 runCalcs(angle, beam, bolt, holeDia);
 drawFig(angle, beam, bolt);
 displayTable();
@@ -182,7 +196,8 @@ displayTable();
 }
 
 function runCalcs(angle, beam, bolt, holeDiameter) {
-
+console.log(beam.Leh, beam.Lev_top, beam.Lev_bot);
+console.log(angle.Leh);
 //
 //BOLT SHEAR
 //
@@ -202,18 +217,22 @@ if (bolt.grade === "groupA") {
 			boltStrength = 84;
 		}
 }  
-
+var oneBoltBS = 2*boltStrength*0.25*3.14159*bolt.size*bolt.size;
 phiPnBS = 0.75*2*boltStrength*0.25*3.14159*bolt.size*bolt.size*bolt.n;
 phiPnBS = Math.round(phiPnBS, 1);
 //
 //SLIP CRITICAL STRENGTH
 //	
 	var Tb;
-
+	var hf;
+	var nFills = $('#numFillers').val();
+	if (nFills === 1 || nFills === 0) {
+		hf = 1.0;
+	} else {
+		hf = 0.85;
+	};
 	//if not SC, no need to report this limit state	
-	if (bolt.type = "noSC") {
-		phiPnSC = "N/A";
-	}
+	
 	if (bolt.grade == "groupA") {
 			switch (bolt.size) {
 				case 0.5: 
@@ -246,9 +265,7 @@ phiPnBS = Math.round(phiPnBS, 1);
 				default:
 					Tb = 0;
 			}
-
-	}
-	else if (bolt.grade == "groupB") {
+	} else if (bolt.grade == "groupB") {
 			switch (bolt.size) {
 				case 0.5: 
 					Tb = 15;
@@ -280,14 +297,15 @@ phiPnBS = Math.round(phiPnBS, 1);
 				default:
 					Tb = 0;
 			}
-
 	}
-//this is incomplete. The following is a placeholder.
-	if (bolt.hole === "STD" || bolt.hole === "SSLT") {
-		phiPnSC = 100;
-	}
-	else if (bolt.hole === "OVS") {
-		phiPnSC = 200;
+	if (bolt.type = "noSC") {
+		phiPnSC = "N/A";
+	} else if (bolt.hole === "STD" || bolt.hole === "SSLT") {
+		phiPnSC = 1.0*1.13*hf*Tb*2;
+		phiPnSC = Math.round(phiPnSC, 1);
+	} else if (bolt.hole === "OVS") {
+		phiPnSC = 0.85*1.13*hf*Tb*2;
+		phiPnSC = Math.round(phiPnSC, 1);
 	}
 
 //
@@ -327,7 +345,7 @@ phiPnBS = Math.round(phiPnBS, 1);
 //SHEAR YIELDING ON BEAM
 //
 
-if (beam.Lev_top && beam.Lev_bot) {
+if (beam.cope) {
 	phiPnBeamYield = 1.0*0.6*beam.Fy*beam.tw*((bolt.n-1)*bolt.s+beam.Lev_top+beam.Lev_bot);
 	phiPnBeamYield = Math.round(phiPnBeamYield, 1);
 } else {
@@ -336,15 +354,30 @@ if (beam.Lev_top && beam.Lev_bot) {
 //
 //SHEAR RUPTURE ON BEAM
 //
-if (beam.Lev_top && beam.Lev_bot) {
+if (beam.cope != "no") {
 	var beamAg = beam.tw*((bolt.n-1)*bolt.s+beam.Lev_top+beam.Lev_bot);
-	var beamAn = beamAg - (beam.tw*bolt.n*holeDiameter);
+	var beamAn = beamAg - (beam.tw*bolt.n*(holeDiameter+0.0625));
 	phiPnBeamRupt = 0.75*0.6*beam.Fu*beamAn;
 	phiPnBeamRupt = Math.round(phiPnBeamRupt, 1);
 } else {
 	phiPnBeamRupt = "N/A";
 }
+//BLOCK SHEAR ON BEAM
+//
+if (beam.cope != "no") {
+	var minBeamLev = Math.min(beam.Lev_top, beam.Lev_bot);
+	var beamAgv = beam.tw*(bolt.s*(bolt.n-1)+minBeamLev);
+	var beamAnv = beamAgv - beam.tw*(bolt.n-0.5)*(holeDiameter+0.0625);
+	var beamAnt = beam.tw*(beam.Leh-0.5*(holeDiameter+0.0625));
+	var beamFuAnt = beam.Fu*beamAnt;
+	var beamComp = Math.min(beam.Fu*beamAnv, beam.Fy*beamAgv);
+	phiPnBSBeam = 0.75*(0.6*beamComp+beamFuAnt);
+	phiPnBSBeam = Math.round(phiPnBSBeam, 1);
+} else {
+	phiPnBSBeam = "N/A";
+}
 
+//console.log(minBeamLev, beamAgv, beamAnv, beamAnt, beamFuAnt, beamComp, phiPnBSBeam);
 //
 //BOLT BEARING ON ANGLE
 //
@@ -382,16 +415,21 @@ phiPnAngleYield = Math.round(phiPnAngleYield, 1);
 //
 //SHEAR RUPTURE ON ANGLE
 //
-var holePlus = holeDiameter + 1/16;
 var angleAg = angle.t*((bolt.n-1)*bolt.s+angle.Lev_top+angle.Lev_bot);
-var angleAn = angleAg - (angle.t*bolt.n*holePlus);
+var angleAn = angleAg - (angle.t*bolt.n*(holeDiameter+0.0625));
 phiPnAngleRupt = 0.75*0.6*2*angle.Fu*angleAn;
 phiPnAngleRupt = Math.round(phiPnAngleRupt, 1);
 //
 //BLOCK SHEAR ON ANGLE
 //
-
-
+var minLev = Math.min(angle.Lev_top, angle.Lev_bot);
+var angleAgv = angle.t*(bolt.s*(bolt.n-1)+minLev);
+var angleAnv = angleAgv - angle.t*(bolt.n-0.5)*(holeDiameter+0.0625);
+var angleAnt = angle.t*(angle.Leh-0.5*(holeDiameter+0.0625));
+var FuAnt = angle.Fu*angleAnt;
+var angleComp = Math.min(angle.Fu*angleAnv, angle.Fy*angleAgv);
+phiPnBSAngle = 0.75*2*(0.6*angleComp+FuAnt);
+phiPnBSAngle = Math.round(phiPnBSAngle, 1);
 
 //this is closing curly brace of runCalcs()
 };
@@ -403,8 +441,8 @@ function drawFig(angle, beam, bolt) {
 	var angleLength = (bolt.n-1)*bolt.s + angle.Lev_top+angle.Lev_bot;
 	var r = beam.tw;	
 	var c = document.getElementById("myCanvas");
-	c.width = beam.bf*1.2*7;
-	c.height = beam.d*1.2*7;
+	c.width = Math.max(beam.bf*1.2*7, angle.b*1.2*7);
+	c.height = Math.max(beam.d*1.2*7, angle.b*1.2*7);
 	var ctx = c.getContext("2d");
 	ctx.scale(7,7);
 	ctx.translate(1,1);
@@ -504,8 +542,10 @@ function displayTable() {
 		tearoutAngles: phiPnTearoutAngle, 
 		shearYieldBeam: phiPnBeamYield,
 		shearRuptBeam: phiPnBeamRupt,
+		blockShearBeam: phiPnBSBeam,
 		shearYieldAngles: phiPnAngleYield,
-		shearRuptAngles: phiPnAngleRupt
+		shearRuptAngles: phiPnAngleRupt,
+		blockShearAngles: phiPnBSAngle
 		 };
 	var newTable = template(data);
 	$('#checks').html(newTable);
