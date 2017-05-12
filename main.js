@@ -196,8 +196,7 @@ displayTable();
 }
 
 function runCalcs(angle, beam, bolt, holeDiameter) {
-console.log(beam.Leh, beam.Lev_top, beam.Lev_bot);
-console.log(angle.Leh);
+
 //
 //BOLT SHEAR
 //
@@ -377,7 +376,6 @@ if (beam.cope != "no") {
 	phiPnBSBeam = "N/A";
 }
 
-//console.log(minBeamLev, beamAgv, beamAnv, beamAnt, beamFuAnt, beamComp, phiPnBSBeam);
 //
 //BOLT BEARING ON ANGLE
 //
