@@ -33,12 +33,12 @@ $('#beamCopeForm').one('change', function() {
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
     	cell1.innerHTML = "Beam Cope - Top Edge Distance";
-    	cell2.innerHTML = "<input id='copeEdgeDist_top' placeholder = 1.5 value=1.5></input>";
+    	cell2.innerHTML = "<input id='copeEdgeDist_top' class = 'form-control input-sm' placeholder = 1.5 value=1.5></input>";
     	var row = mytable.insertRow(n-1);
 		var cella = row.insertCell(0);
     	var cellb = row.insertCell(1);
     	cella.innerHTML = "Beam - Horizontal End Distance";
-    	cellb.innerHTML = "<input id='beamLeh' placeholder = 1.25 value = 1.25></input>";
+    	cellb.innerHTML = "<input id='beamLeh' class = 'form-control input-sm' placeholder = 1.25 value = 1.25></input>";
 	} 
 	if (copeCondition ==="both") {
 		var mytable = document.getElementById('inputTable');
@@ -46,18 +46,18 @@ $('#beamCopeForm').one('change', function() {
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
     	cell1.innerHTML = "Beam Cope - Top Edge Distance";
-    	cell2.innerHTML = "<input id='copeEdgeDist_top' placeholder = 1.5 value=1.5></input>";
+    	cell2.innerHTML = "<input id='copeEdgeDist_top' class = 'form-control input-sm' placeholder = 1.5 value=1.5></input>";
 		var mytable = document.getElementById('inputTable');
 		var row = mytable.insertRow(n-1);
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
     	cell1.innerHTML = "Beam Cope - Bottom Edge Distance";
-    	cell2.innerHTML = "<input id='copeEdgeDist_bot' placeholder = 1.5 value=1.5></input>";
+    	cell2.innerHTML = "<input id='copeEdgeDist_bot' class = 'form-control input-sm' placeholder = 1.5 value=1.5></input>";
     	var row = mytable.insertRow(n);
 		var cella = row.insertCell(0);
     	var cellb = row.insertCell(1);
     	cella.innerHTML = "Beam - Horizontal End Distance";
-    	cellb.innerHTML = "<input id='beamLeh' placeholder = 1.25 value = 1.25></input>";
+    	cellb.innerHTML = "<input id='beamLeh' class = 'form-control input-sm' placeholder = 1.25 value = 1.25></input>";
 	}
 });
 
@@ -170,30 +170,43 @@ var holeDia;
 	}
 
 //CHECKS TO MAKE SURE GEOMETRIES ARE REASONABLE
+if (testInput(angle, beam, bolt,holeDia)) {
+runCalcs(angle, beam, bolt, holeDia);
+drawFig(angle, beam, bolt);
+displayTable();
+}
+
+//end of getProps
+}
+
+//function to test that inputs are reasonable
+function testInput(angle, beam, bolt, holeDia) {
 if (beam.d < (angle.Lev_top+angle.Lev_bot+(bolt.n-1)*bolt.s)) {
 	alert("The connection is too long. Please choose a different geometry.");
+	return false;
 }
 if (bolt.hole === "OVS" || bolt.hole === "OVS" && bolt.type === "STD" ) {
 	alert("You must use a slip-critical joint with OVS or SSLT holes.");
+	return false;
 }
 if (bolt.s < bolt.size*2.67 || bolt.s-(bolt.size+.125) < bolt.size) {
 	alert("Bolt spacing must be at least 2-2/3d and bolt clear distance must be at least d.");
+	return false;
 }
 
 var maxDist = Math.max(beam.Leh, beam.Lev_top, beam.Lev_bot, angle.Leh, angle.Lev_top, angle.Lev_bot);
 
 if (maxDist > 6 || maxDist > 12*beam.tw || maxDist > 12*angle.t) {
 	alert("Bolt edge distance is too large.");
+	return false;
 }
 if (beam.cope == "") {
 	alert("Please specify beam cope information.");
+	return false;
+} else {return true;}
+//end of testInput function
 }
-runCalcs(angle, beam, bolt, holeDia);
-drawFig(angle, beam, bolt);
-displayTable();
 
-//end of getProps
-}
 
 function runCalcs(angle, beam, bolt, holeDiameter) {
 
