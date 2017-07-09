@@ -2,16 +2,22 @@
 //global variables which are used by the displayTable function that populates the Handlebars template
 var phiPnBSAngle;
 var phiPnBSBeam;
-var phiPnBearing;
-var phiPnTearout;
-var phiPnBearingAngle;
-var phiPnTearoutAngle;
 var phiPnSC;
 var phiPnBeamYield;
 var phiPnBeamRupt;
 var phiPnAngleYield;
 var phiPnAngleRupt;
-
+var phiPnBoltBeamSide;
+var oneBoltBS;
+var oneBoltBeamTearoutEdge;
+var oneBoltBeamTearoutCenter;
+var oneBoltBeamBearing;
+var oneBoltAngleBearing;
+var oneBoltAngleTearoutEdge;
+var oneBoltAngleTearoutCenter;
+var beam;
+var angle;
+var bolt;
 
 
 $(document).ready(function() {
@@ -64,15 +70,15 @@ $('#beamCopeForm').one('change', function() {
 //event listener to ask for additional user input only if SC bolts
 $('#jointTypeForm').one('change', function() {
 	var jointType = $('#jointType').val();	
-	if (jointType === "SCA" || jointType ==="SCB") {
+	console.log(jointType);
+	if (jointType === "SCA" || jointType === "SCB") {
 		var mytable = document.getElementById('inputTable');
-		var row = mytable.insertRow(8);
+		var row = mytable.insertRow(7);
 		var cell1 = row.insertCell(0);
     	var cell2 = row.insertCell(1);
     	cell1.innerHTML = "Number of fillers";
-    	cell2.innerHTML = "<input id='numFillers' type = number></input>";
-    	
-	} 
+    	cell2.innerHTML = "<input id='numFillers' class = 'form-control input-sm' type = number></input>";
+    } 
 });
 
 //end of on ready function
@@ -83,9 +89,7 @@ function getProps() {
 var beamSize= $('#beamSize').val();
 var angleSize= $('#angleSize').val();
 
-var beam;
-var angle;
-var bolt;
+
 
 //Wshapes is a large array of objects in a separate Wshapes.js file
 for (var i = 0; i < Wshapes.length; i++) {
@@ -185,7 +189,7 @@ if (beam.d < (angle.Lev_top+angle.Lev_bot+(bolt.n-1)*bolt.s)) {
 	alert("The connection is too long. Please choose a different geometry.");
 	return false;
 }
-if (bolt.hole === "OVS" || bolt.hole === "OVS" && bolt.type === "STD" ) {
+if (bolt.hole === "SSLT" || bolt.hole === "OVS" && bolt.type === "noSC") {
 	alert("You must use a slip-critical joint with OVS or SSLT holes.");
 	return false;
 }
@@ -229,7 +233,7 @@ if (bolt.grade === "groupA") {
 			boltStrength = 84;
 		}
 }  
-var oneBoltBS = 2*boltStrength*0.25*3.14159*bolt.size*bolt.size;
+oneBoltBS = 0.75*2*boltStrength*0.25*3.14159*bolt.size*bolt.size;
 phiPnBS = 0.75*2*boltStrength*0.25*3.14159*bolt.size*bolt.size*bolt.n;
 phiPnBS = Math.round(phiPnBS, 1);
 //
@@ -310,7 +314,8 @@ phiPnBS = Math.round(phiPnBS, 1);
 					Tb = 0;
 			}
 	}
-	if (bolt.type = "noSC") {
+	console.log(bolt.type);
+	if (bolt.type === "noSC") {
 		phiPnSC = "N/A";
 	} else if (bolt.hole === "STD" || bolt.hole === "SSLT") {
 		phiPnSC = 1.0*1.13*hf*Tb*2;
@@ -326,12 +331,14 @@ phiPnBS = Math.round(phiPnBS, 1);
 
 	if (bolt.defCond === "Yes") {
 		phiPnBearing = 0.75*2.4*bolt.n*bolt.size*beam.tw*beam.Fu;
+		oneBoltBeamBearing = 0.75*2.4*bolt.size*beam.tw*beam.Fu;
 	}
 	else if (bolt.defCond === "No") {
 		phiPnBearing = 0.75*3*bolt.n*bolt.size*beam.tw*beam.Fu;
+		oneBoltBeamBearing = 0.75*3*bolt.size*beam.tw*beam.Fu;
 	}
 	phiPnBearing = Math.round(phiPnBearing,1);
-
+	oneBoltBeamBearing = Math.round(oneBoltBeamBearing,1);
 
 //
 //BOLT TEAROUT ON BEAM
@@ -344,20 +351,66 @@ phiPnBS = Math.round(phiPnBS, 1);
 		if (bolt.defCond === "Yes") {
 			phiPnTearout = 0.75*1.2*((bolt.n-1)*Lc+Lc_top)*beam.tw*beam.Fu;
 			phiPnTearout = Math.round(phiPnTearout, 1);
+			oneBoltBeamTearoutCenter = 0.75*1.2*Lc*beam.tw*beam.Fu;
+			oneBoltBeamTearoutEdge = 0.75*1.2*Lc_top*beam.tw*beam.Fu;
 		}
 		else if (bolt.defCond === "No") {
 			phiPnTearout = 0.75*2.4*((bolt.n-1)*Lc+Lc_top)*beam.tw*beam.Fu;
 			phiPnTearout = Math.round(phiPnTearout, 1);
+			oneBoltBeamTearoutCenter = 0.75*2.4*Lc*beam.tw*beam.Fu;
+			oneBoltBeamTearoutEdge = 0.75*2.4*Lc_top*beam.tw*beam.Fu;
 		}
 	} else {
-		phiPnTearout = "N/A"	
+		phiPnTearout = "N/A"
+		oneBoltBeamTearoutCenter = 1000000000;
+		oneBoltBeamTearoutEdge = 1000000000;	
 	}
+//
+//BOLT BEARING ON ANGLE
+//
+
+	if (bolt.defCond === "Yes") {
+		phiPnBearingAngle = 2*0.75*2.4*bolt.n*bolt.size*angle.t*angle.Fu;
+		oneBoltAngleBearing = 2*0.75*2.4*bolt.size*angle.t*angle.Fu;
+	}
+	else if (bolt.defCond === "No") {
+		phiPnBearingAngle = 2*0.75*3*bolt.n*bolt.size*angle.t*angle.Fu;
+		oneBoltAngleBearing = 2*0.75*3*bolt.size*angle.t*angle.Fu;
+	}
+	phiPnBearingAngle = Math.round(phiPnBearingAngle,1);
+	oneBoltAngleBearing = Math.round(oneBoltAngleBearing, 1);
+//
+//BOLT TEAROUT ON ANGLE
+//	
+var Lc_angle_top = angle.Lev_top-0.5*holeDiameter;
+var Lc_angle_bot = angle.Lev_bot-0.5*holeDiameter;
+var Lc_min = Math.min(Lc_angle_top, Lc_angle_bot);
+
+	if (bolt.defCond === "Yes") {
+			phiPnTearoutAngle = 2*0.75*1.2*((bolt.n-1)*Lc+Lc_angle_top)*angle.t*angle.Fu;
+			oneBoltAngleTearoutCenter = 2*0.75*1.2*Lc*angle.t*angle.Fu;
+			oneBoltAngleTearoutEdge = 2*0.75*1.2*Lc_angle_top*angle.t*angle.Fu;
+		}
+	else if (bolt.defCond === "No") {
+			phiPnTearoutAngle = 2*0.75*2.4*((bolt.n-1)*Lc+Lc_angle_top)*angle.t*angle.Fu;
+			oneBoltAngleTearoutCenter = 2*0.75*2.4*Lc*angle.t*angle.Fu;
+			oneBoltAngleTearoutEdge = 2*0.75*2.4*Lc_angle_top*angle.t*angle.Fu;			
+		}
+	phiPnTearoutAngle = Math.round(phiPnTearoutAngle, 1);
+	oneBoltAngleTearoutCenter = Math.round(oneBoltAngleTearoutCenter, 1);
+	oneBoltAngleTearoutEdge= Math.round(oneBoltAngleTearoutEdge, 1);
+//
+//COMBINE BOLT SHEAR, BEARING, AND TEAROUT ON BEAM SIDE
+//
+var edgeBoltBeamSide = Math.min(oneBoltBS, oneBoltBeamBearing, oneBoltAngleBearing, oneBoltBeamTearoutEdge, oneBoltAngleTearoutEdge);
+var typBoltBeamSide = Math.min(oneBoltBS, oneBoltBeamBearing, oneBoltAngleBearing, oneBoltBeamTearoutCenter, oneBoltAngleTearoutCenter);
+phiPnBoltBeamSide = Math.round(edgeBoltBeamSide + (bolt.n-1)*typBoltBeamSide, 1);
 	
 //
 //SHEAR YIELDING ON BEAM
 //
 
-if (beam.cope) {
+if (beam.cope != "no") {
 	phiPnBeamYield = 1.0*0.6*beam.Fy*beam.tw*((bolt.n-1)*bolt.s+beam.Lev_top+beam.Lev_bot);
 	phiPnBeamYield = Math.round(phiPnBeamYield, 1);
 } else {
@@ -389,33 +442,7 @@ if (beam.cope != "no") {
 	phiPnBSBeam = "N/A";
 }
 
-//
-//BOLT BEARING ON ANGLE
-//
 
-	if (bolt.defCond === "Yes") {
-		phiPnBearingAngle = 2*0.75*2.4*bolt.n*bolt.size*angle.t*angle.Fu;
-	}
-	else if (bolt.defCond === "No") {
-		phiPnBearingAngle = 2*0.75*3*bolt.n*bolt.size*angle.t*angle.Fu;
-	}
-	phiPnBearingAngle = Math.round(phiPnBearingAngle,1);
-
-//
-//BOLT TEAROUT ON ANGLE
-//	
-var Lc_angle_top = angle.Lev_top-0.5*holeDiameter;
-var Lc_angle_bot = angle.Lev_bot-0.5*holeDiameter;
-var Lc_min = Math.min(Lc_angle_top, Lc_angle_bot);
-
-	if (bolt.defCond === "Yes") {
-			phiPnTearoutAngle = 2*0.75*1.2*((bolt.n-1)*Lc+Lc_angle_top)*angle.t*angle.Fu;
-			phiPnTearoutAngle = Math.round(phiPnTearoutAngle, 1);
-		}
-	else if (bolt.defCond === "No") {
-			phiPnTearoutAngle = 2*0.75*2.4*((bolt.n-1)*Lc+Lc_angle_top)*angle.t*angle.Fu;
-			phiPnTearoutAngle = Math.round(phiPnTearoutAngle, 1);
-		}
 //
 //SHEAR YIELDING ON ANGLE
 //
@@ -545,12 +572,8 @@ function drawFig(angle, beam, bolt) {
 function displayTable() {
 	var source = $("#limit-states").html();
 	var template = Handlebars.compile(source);
-	var data = {phiPnBS: phiPnBS, 
+	var data = {LSBoltBeamSide: phiPnBoltBeamSide, 
 		slipCritStrength: phiPnSC, 
-		bearing: phiPnBearing, 
-		tearout: phiPnTearout, 
-		bearingAngles: phiPnBearingAngle, 
-		tearoutAngles: phiPnTearoutAngle, 
 		shearYieldBeam: phiPnBeamYield,
 		shearRuptBeam: phiPnBeamRupt,
 		blockShearBeam: phiPnBSBeam,

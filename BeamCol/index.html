@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+ 	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="../MyStyle.css">
+ </head>
+
+
+<body>
+<nav class = "pageNav">
+<ul class="navList">
+      <li class = "navLi">
+        <a href="../index.html"><span class = "navLi">Home</span></a>
+      
+ 
+ </nav>
+
+<h1>Beam-Column Selector</h1>
+
+<div class = "col-md-5">
+<h2>User Inputs</h2>
+<table id = "inputTable" class = "table table-hover table-bordered table-condensed table-striped vertical-align">
+<tr>
+	<td>Unbraced length in bending (for LTB), <i>L </i>(ft):</td> 
+	<td><input class = "form-control input-sm" id = "flexL" placeholder=14 value=14></td>
+</tr>
+<tr>
+	<td>Effective length for compression about x-x axis, <i>L<sub>cx</sub></i> (ft):</td>
+	<td><input class="form-control input-sm" id = "colKLx" placeholder=14 value=14></td>
+</tr>
+<tr>
+	<td>Effective length for compression about y-y axis, <i>L<sub>cy</sub></i> (ft):</td>
+	<td><input class="form-control input-sm" id = "colKLy"  placeholder=14 value=14></td>
+</tr>
+<tr>
+	<td><i>C<sub>b</sub></i>:</td>
+	<td><input class="form-control input-sm" id = "Cb" placeholder=1 value=1></td>
+</tr>
+<tr>
+	<td>Required axial strength, <i>P<sub>u</sub></i> (kips): </td>
+	<td><input  class="form-control input-sm" id = "Pu" placeholder=300 value = 300></td>
+</tr>
+<tr>
+	<td>Required flexural strength, <i>M<sub>u</sub></i> (kip-ft):</td>
+	<td><input class="form-control input-sm" id = "Mu" placeholder=300 value=300></td>
+</tr>
+<tr>
+	<td>MaxDepth:</td>
+	<td><select class="form-control input-sm" id ="maximumDepth">
+		<option value="8">W8</option>
+		<option value="10">W10</option>
+		<option value="12">W12</option>
+		<option value="14">W14</option>
+		<option value="16">W16</option>
+		<option value="18">W18</option>
+		<option value="21">W21</option>
+		<option value="24">W24</option>
+		<option value="27">W27</option>
+		<option value="30">W30</option>
+		<option value="36">W36</option>
+		<option value="40">W40</option>
+	</select>
+	</td>
+</tr>
+</table>
+<button class = "btn" id="runFunc">Get minimum-weight shape</button>
+</div>
+
+<div class = "col-md-5">
+<h2>Optimal Shape</h2>
+The least-weight shape is: <p id="result"></p>
+
+</div>
+
+<script src = "../jsFolder/handlebars-v4.0.5.js"></script>
+<script src = "../jsFolder/jquery-3.1.1.js"></script>
+<!--<script
+  src="https://code.jquery.com/jquery-3.2.1.slim.js"
+  integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg="
+  crossorigin="anonymous"></script>-->
+<script type = "text/javascript" src = "../WshapesJS.js"></script>
+<!--<script type="text/javascript" src="constants.js"></script>-->
+<script type="text/javascript" src="main.js"></script>
+</body>
+</html>
+

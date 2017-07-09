@@ -1,6 +1,4 @@
 body {
-    /*background-color: #ffa07a;*/
-	/*background-image: url("Fibnums.jpg");*/
 
 	font-family: "Arial";
     font-size: 12px;
@@ -19,33 +17,75 @@ h2 {
 	font-size: 18px;
 }
 
+#centeredDiv {
+	display:inline-block;
+}
+
+.mainPageLi {
+	font-size: 24px;
+	font-variant: small-caps;
+}
+
+
+/*div {
+	border: 1px solid blue;
+}*/
+
 #myCanvas {
 	vertical-align: top;
 	text-align: center;
 	padding-top: 44px;
 }
 
+
+
 #startAgainBtn {
 	display:none;
 }
+
+
+
+.pageNav {
+	background-color: #999999;
+	font-color: white;
+	/*position: absolute;*/
+	/*top: 0;*/
+	width: 100%;
+	padding: 7px;
+}
+
+.navLi {
+	display: inline;
+	padding-right: 5%;
+	color: #ffffff;
+	font-variant: small-caps;
+	font-size: 20px;
+}
+
+.navList {
+	text-align: left;
+}
+
 /*
-table td {
-	width: 300px;
-}
-
-
-
-
-	
-}
-
-#divButton {
-display:inline-block;
-float: left;
-}
-
-div {
-	border: 2px solid blue;
-	
-}
+STYLES FOR SHAPES PAGE
 */
+
+#shapeCanvas {
+	
+}
+
+#shapeForm {
+	margin-top: 10px;
+}
+
+#clearButton {
+	display:none;
+}
+
+/*
+STYLES FOR BEAM-COL PAGE
+*/
+
+#result {
+	font-size: 24px;
+}
