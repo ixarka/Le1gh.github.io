@@ -4,94 +4,65 @@ $(document).ready(function() {
 
     });
     
-function phiPn(KLx, KLy, A, bf2tf, htw, tw, rx, ry)
+function phiPn(KLx, KLy, A, bf2tf, htw, tw, rx, ry, bf, d, tf, kdet)
 {
     var E = 29000.;
     var Fy = 50.;
     var Qs;
-    var Fcrx;
-    var Fcry;
-    var Qa;
-	
+    var Fcr;
+    var Fe;
+   	var Ae = A;
 
     //calculate Fe
-    Fex = Math.pow(3.14159, 2) * E/Math.pow(KLx * 12. / rx,2);
-    Fey = Math.pow(3.14159, 2) * E/Math.pow(KLy * 12. / ry, 2);
-     //check for slender flanges
-    if(bf2tf < 0.56 * Math.sqrt(E / Fy))
-    {
-        Qs = 1;
+    var Fex = Math.pow(3.14159, 2) * E/Math.pow(KLx * 12. / rx, 2);
+    var Fey = Math.pow(3.14159, 2) * E/Math.pow(KLy * 12. / ry, 2);
+    Fe = Math.min(Fex, Fey);
+    var lambdarFlange = 0.56*Math.sqrt(E / Fy)
+    var lambdarWeb = 1.49*Math.sqrt(E / Fy)
+    //calculate Fcr
+    if (Fy/Fe < 2.25) {
+        Fcr = Fy * Math.pow(0.658, (Fy/Fe))
     }
-    else if(bf2tf < 1.03 * Math.sqrt(E / Fy) && bf2tf > 0.56 * Math.sqrt(E / Fy))
-    {
-        Qs = 1.415 - 0.75 * bf2tf * Math.sqrt(Fy / E);
-    }
-    else 
-    {
-        Qs = 0.69 * E / (Fy * Math.pow(bf2tf,2));
-    }
-    //x direction Fcrx
-    if(Qs * Fy / Fex < 2.25)
-        Fcrx = Qs * Fy * Math.pow(0.658, (Qs * Fy / Fex));
-    else 
-    {
-        Fcrx = 0.877 * Fex;
+    else {
+        Fcr = 0.877 * Fe;
     }
 
-    //x direction check for slender webs
-    if(htw > 1.49 * Math.sqrt(E / Fy))
-    {
-        var be = 1.92 * tw * Math.sqrt(E / Fy) * (1 - (0.34 / htw) * Math.sqrt(E / Fy));
-        var Ae = A - (htw * tw - be) * tw;
-        Qa = Ae / A;
-    }   
-    else 
-    {
-        Qa = 1;
-    }
 
-    //x direction account for both slender webs and flanges
-    Q = Qs * Qa;
-    if(Q * Fy / Fex < 2.25)
-    {
-        Fcrx = Q * Fy * Math.pow(0.658, (Q * Fy / Fex));
-    }
-    else 
-    {
-        Fcrx = 0.877 * Fex;
-    }
+     //check for slender flanges only
 
-    //x direction calculate final Pn
-    var Pnx = Fcrx * A;
-    //y direction Fcry
-    if(Qs * Fy / Fey < 2.25)
-    {
-        Fcry = Q * Fy * Math.pow(0.658, (Q * Fy / Fey))
-    }
-    else
-    {
-        Fcry = 0.877 * Fey;
-    }
+     if (bf2tf > lambdarFlange*Math.sqrt(Fy/Fcr) && htw < lambdarWeb*Math.sqrt(Fy/Fcr)) {
+     	var c1 = 0.22;
+     	var c2 = 1.49;
+     	var Fel = Fy*Math.pow(c2*lambdarFlange/bf2tf, 2);
+     	var be = bf*(1-c1*Math.sqrt(Fel/Fcr))*Math.sqrt(Fel/Fcr);
+     	Ae = (2*be*tf)+(tw*d-2*tf);
+     }
 
-  
-    //y direction account for both slender webs and flanges
-    Q = Qs * Qa;
-    if(Q * Fy / Fey < 2.25)
-    {
-        Fcry = Q * Fy * Math.pow(0.658, (Q * Fy / Fey));
-    }
-    else 
-    {
-        Fcry = 0.877 * Fey;
-    }
+     //check for slender webs
+     if (htw >lambdarWeb*Math.sqrt(Fy/Fcr) && bf2tf < lambdarFlange*Math.sqrt(Fy/Fcr)) {
+     	var c1 = 0.18;
+     	var c2 = 1.31;
+     	var h = htw*tw;
+     	var Fel = Fy*Math.pow(c2*lambdarWeb/htw, 2);
+     	var he = h*(1-c1*Math.sqrt(Fel/Fcr))*Math.sqrt(Fel/Fcr);
+     	Ae = (2*bf*tf)+tw*he;
+     }
 
-    //y direction calculate final Pn
-    var Pny = Fcry * A;
+      if (htw >lambdarWeb*Math.sqrt(Fy/Fcr) && bf2tf > lambdarFlange*Math.sqrt(Fy/Fcr)) {
+      	var c1Flange = 0.22;
+     	var c2Flange = 1.49;
+     	var c1Web = 0.18;
+     	var c2Web = 1.31;
+     	var FelFlange = Fy*Math.pow(c2Flange*lambdarFlange/bf2tf, 2);
+     	var FelWeb = Fy*Math.pow(c2Web*lambdarWeb/htw, 2);
+     	var be = bf*(1-c1Flange*Math.sqrt(FelFlange/Fcr))*Math.sqrt(FelFlange/Fcr);
+     	var he = h*(1-c1*Math.sqrt(Fel/Fcr))*Math.sqrt(Fel/Fcr);
+     	Ae = he*tw+2*bf*be;
+     }
 
-    var Pn = Math.min(Pny, Pnx);
-    var phiPn = Pn * 0.9;
+     var phiPn = 0.9*Fcr*Math.min(A, Ae);
+     return phiPn;
 
-    return phiPn;
 }
 
 
@@ -153,7 +124,7 @@ function getMnPn(L, KLx, KLy, Cb)
     for(var i = 0; i < Wshapes.length; i++) {
        // r = Wshapes[shape];
         var shape = Wshapes[i];   
-        var pn = phiPn(KLx, KLy, shape.A, shape.bf2tf, shape.htw, shape.tw, shape.rx, shape.ry);
+        var pn = phiPn(KLx, KLy, shape.A, shape.bf2tf, shape.htw, shape.tw, shape.rx, shape.ry, shape.bf, shape.d, shape.tf, shape.kdet);
         var rts = Math.sqrt(Math.sqrt(shape.Iy*shape.Cw)/shape.Sx);
         var h0 = shape.d - shape.tf;
         var mn = phiMn(L, Cb, shape.Zx, shape.Sx, rts, shape.J, h0, shape.ry, shape.Iy, shape.bf2tf, shape.htw);
@@ -167,8 +138,9 @@ function getMnPn(L, KLx, KLy, Cb)
         }
        
     }
+     console.log(mnpn);
      return mnpn;
-}
+ }
 
 function getShape(Pu, Mu, maxDepth, mnpn) {
    
@@ -203,9 +175,8 @@ function getShape(Pu, Mu, maxDepth, mnpn) {
 
 
 function showMnPn() {
-console.log(5);
+
  var L=parseInt($('#flexL').val());
- console.log(L);
  var KLx=parseInt($("#colKLx").val());
  var KLy=parseInt($("#colKLy").val());
 var Cb=parseInt($("#Cb").val());
